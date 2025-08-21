@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, NavLink } from 'react-router-dom';
 import { ethers } from 'ethers';
-import './App.css';
+
+// Import the new components
+import UserDashboard from './components/UserDashboard';
+import EmployerDashboard from './components/EmployerDashboard';
+import CompanyDashboard from './components/CompanyDashboard';
 import contractArtifact from './artifacts/ProofAI.json';
 
-// 1. PASTE YOUR NEW FINAL CONTRACT ADDRESS HERE
-const contractAddress = "0x4F43a3507737b034eaE43C763aE0E31E046d9328";
+// Your final contract address
+const contractAddress = "0x175c4c40695ee7fd113F06d972987D13E3571E0c";
 const contractABI = contractArtifact.abi;
 
 function App() {
   const [account, setAccount] = useState(null);
-  const [credentials, setCredentials] = useState([]);
-  const [message, setMessage] = useState("Please connect your wallet.");
+  const [contract, setContract] = useState(null);
+  const [signer, setSigner] = useState(null);
 
-  const connectWallet = async () => { /* ... (no change) ... */ 
+  const connectWallet = async () => {
     if (typeof window.ethereum === 'undefined') {
-      setMessage("Please install MetaMask!");
+      alert("Please install MetaMask!");
       return;
     }
     try {
@@ -22,71 +27,56 @@ function App() {
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
+      const contractInstance = new ethers.Contract(contractAddress, contractABI, signer);
+
       setAccount(address);
-      setMessage(`Connected: ${address}`);
+      setSigner(signer);
+      setContract(contractInstance);
     } catch (error) {
-      setMessage("Failed to connect wallet.");
-    }
-  };
-
-  const fetchCredentials = async () => {
-    if (!account) { setMessage("Please connect wallet first."); return; }
-    try {
-      setMessage("Fetching credentials from blockchain...");
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(contractAddress, contractABI, provider);
-
-      const tokenIds = await contract.getCredentialsByOwner(account);
-      setMessage("Found credentials! Fetching details...");
-
-      // Fetch metadata for each token ID
-      let fetchedCredentials = [];
-      for (const id of tokenIds) {
-        const metadataUri = await contract.tokenURI(id);
-        const metadataResponse = await fetch(metadataUri);
-        const metadata = await metadataResponse.json();
-        metadata.tokenId = id.toString();
-        fetchedCredentials.push(metadata);
-      }
-
-      setCredentials(fetchedCredentials);
-      setMessage(fetchedCredentials.length > 0 ? "Credentials loaded." : "No credentials found.");
-    } catch (error) {
-      console.error("Error fetching:", error);
-      setMessage("Error fetching credentials.");
+      console.error("Error connecting wallet:", error);
     }
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>🔐 ProofAI Verifiable Credentials</h1>
-        <p className="message">{message}</p>
+    <Router>
+      <div className="App">
+        <nav className="navbar">
+          <div className="nav-brand">
+            <h1>🔐 ProofAI</h1>
+          </div>
+          <div className="nav-links">
+            <NavLink to="/user">My Profile</NavLink>
+            <NavLink to="/employer">Employer Verify</NavLink>
+            <NavLink to="/company">Company Hub</NavLink>
+          </div>
+          <div className="wallet-info">
+            {account ? (
+              <p>Connected: {`${account.slice(0, 6)}...${account.slice(-4)}`}</p>
+            ) : (
+              <button onClick={connectWallet}>Connect Wallet</button>
+            )}
+          </div>
+        </nav>
 
-        {!account ? (
-          <button onClick={connectWallet}>Connect Wallet</button>
-        ) : (
-          <button onClick={fetchCredentials}>Fetch My Credentials</button>
-        )}
-
-        <div className="credentials-grid">
-          {credentials.map((cred, index) => (
-            <div key={index} className="credential-card">
-              <img src={cred.image} alt={cred.name} />
-              <h3>{cred.name}</h3>
-              <p>{cred.description}</p>
-              <div className="attributes">
-                {cred.attributes.map((attr, idx) => (
-                  <div key={idx} className="attribute">
-                    <strong>{attr.trait_type}:</strong> {attr.value}
-                  </div>
-                ))}
-              </div>
+        <main className="main-content">
+          {account ? (
+            <Routes>
+              <Route path="/user" element={<UserDashboard account={account} contract={contract} signer={signer} />} />
+              <Route path="/employer" element={<EmployerDashboard account={account} contract={contract} />} />
+              <Route path="/company" element={<CompanyDashboard account={account} contract={contract} signer={signer} />} />
+              {/* Default route */}
+              <Route path="/" element={<UserDashboard account={account} contract={contract} signer={signer} />} />
+            </Routes>
+          ) : (
+            <div className="connect-wallet-prompt">
+              <h2>Welcome to the Employment Fraud Prevention Platform</h2>
+              <p>Please connect your wallet to continue.</p>
+              <button onClick={connectWallet}>Connect Wallet</button>
             </div>
-          ))}
-        </div>
-      </header>
-    </div>
+          )}
+        </main>
+      </div>
+    </Router>
   );
 }
 

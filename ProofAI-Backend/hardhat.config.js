@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config(); // To manage private keys securely
+require("@nomicfoundation/hardhat-verify"); // Import the new plugin
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -8,7 +9,11 @@ module.exports = {
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
-      accounts: [process.env.PRIVATE_KEY] // We will set this up later
+      accounts: [process.env.PRIVATE_KEY]
     }
+  },
+  // Add this new section for BscScan verification
+  etherscan: {
+    apiKey: process.env.BSCSCAN_API_KEY
   }
 };
