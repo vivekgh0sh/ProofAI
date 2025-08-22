@@ -4,7 +4,7 @@ async function main() {
 
   // 1. Paste your NEW final contract address here
 
-  const contractAddress = "0x2cF2EC61D5F50bcaa41F2e7Dae256955E4D1b5D3";
+  const contractAddress = "0x5FB23E28eADE3dD32551224E9FAF7BC1c7A53D71";
 
   const companyNameToAuthorize = "ProofAI Demo Corp"; // You can change this name
 

@@ -1,19 +1,24 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("@nomicfoundation/hardhat-verify"); // Import the new plugin
 require("dotenv").config();
 
-/** @type import('hardhat/config').HardhatUserConfig */
+const { PRIVATE_KEY } = process.env;
+
 module.exports = {
-  solidity: "0.8.20", // The same version as in our contract
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks: {
-    bscTestnet: {
+    hardhat: {},
+    bnbtestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
-      accounts: [process.env.PRIVATE_KEY]
+      accounts: [`0x${PRIVATE_KEY}`]
     }
-  },
-  // Add this new section for BscScan verification
-  etherscan: {
-    apiKey: process.env.BSCSCAN_API_KEY
   }
 };

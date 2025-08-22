@@ -1,21 +1,29 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, NavLink } from 'react-router-dom';
-import { ethers } from 'ethers';
+// src/App.jsx
 
-// Import the new components
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom';
+import { ethers } from 'ethers';
+import './index.css';
+
+// Import Pages
+import HomePage from './pages/HomePage';
+
+// Import Components
 import UserDashboard from './components/UserDashboard';
 import EmployerDashboard from './components/EmployerDashboard';
 import CompanyDashboard from './components/CompanyDashboard';
+import CompanyVerification from './components/CompanyVerification';
+import Footer from './components/Footer'; // <-- ADD THIS LINE
+import PricingPage from "./pages/PricingPage";
 import contractArtifact from './artifacts/ProofAI.json';
-
-// Your final contract address
-const contractAddress = "0x2cF2EC61D5F50bcaa41F2e7Dae256955E4D1b5D3";
+const contractAddress = "0x5FB23E28eADE3dD32551224E9FAF7BC1c7A53D71"; // <-- IMPORTANT: Use your latest address
 const contractABI = contractArtifact.abi;
 
 function App() {
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
   const [signer, setSigner] = useState(null);
+  const navigate = useNavigate();
 
   const connectWallet = async () => {
     if (typeof window.ethereum === 'undefined') {
@@ -32,52 +40,58 @@ function App() {
       setAccount(address);
       setSigner(signer);
       setContract(contractInstance);
+
+      // On successful connection, navigate to the user dashboard
+      navigate('/user');
     } catch (error) {
       console.error("Error connecting wallet:", error);
     }
   };
 
   return (
-    <Router>
-      <div className="App">
-        <nav className="navbar">
-          <div className="nav-brand">
-            <h1>🔐 ProofAI</h1>
-          </div>
-          <div className="nav-links">
-            <NavLink to="/user">My Profile</NavLink>
-            <NavLink to="/employer">Employer Verify</NavLink>
-            <NavLink to="/company">Company Hub</NavLink>
-          </div>
-          <div className="wallet-info">
-            {account ? (
-              <p>Connected: {`${account.slice(0, 6)}...${account.slice(-4)}`}</p>
-            ) : (
-              <button onClick={connectWallet}>Connect Wallet</button>
-            )}
-          </div>
-        </nav>
-
-        <main className="main-content">
+    <div className="App">
+      <nav className="navbar">
+        <div className="nav-brand"><h1>🔐 ProofAI</h1></div>
+        <div className="nav-links">
+          {/* This part of the navbar can be improved later to show different links based on login status */}
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/pricing">Pricing</NavLink>
+          {account && <NavLink to="/user">My Profile</NavLink>}
+          {account && <NavLink to="/employer">Employer Verify</NavLink>}
+          {account && <NavLink to="/verify-company">Verify Company</NavLink>}
+          {account && <NavLink to="/company">Company Hub</NavLink>}
+        </div>
+        <div className="wallet-info">
           {account ? (
-            <Routes>
-              <Route path="/user" element={<UserDashboard account={account} contract={contract} signer={signer} />} />
-              <Route path="/employer" element={<EmployerDashboard account={account} contract={contract} />} />
-              <Route path="/company" element={<CompanyDashboard account={account} contract={contract} signer={signer} />} />
-              {/* Default route */}
-              <Route path="/" element={<UserDashboard account={account} contract={contract} signer={signer} />} />
-            </Routes>
+            <p>Connected: {`${account.slice(0, 6)}...${account.slice(-4)}`}</p>
           ) : (
-            <div className="connect-wallet-prompt">
-              <h2>Welcome to the Employment Fraud Prevention Platform</h2>
-              <p>Please connect your wallet to continue.</p>
-              <button onClick={connectWallet}>Connect Wallet</button>
-            </div>
+            <button onClick={connectWallet} className="btn-primary">Connect Wallet</button>
           )}
-        </main>
-      </div>
-    </Router>
+        </div>
+      </nav>
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<HomePage connectWallet={connectWallet} />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          
+          {/* Protected Routes - only accessible when `account` is not null */}
+          <Route path="/user" element={account ? <UserDashboard account={account} contract={contract} signer={signer} /> : <Navigate to="/" />} />
+          <Route path="/employer" element={account ? <EmployerDashboard account={account} contract={contract} /> : <Navigate to="/" />} />
+          <Route path="/company" element={account ? <CompanyDashboard account={account} contract={contract} signer={signer} /> : <Navigate to="/" />} />
+          <Route path="/verify-company" element={account ? <CompanyVerification account={account} contract={contract} /> : <Navigate to="/" />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
   );
 }
 
-export default App;
+// Keep the AppWrapper for the router's basename
+const AppWrapper = () => (
+  <Router basename="/ProofAI">
+    <App />
+  </Router>
+);
+
+export default AppWrapper;

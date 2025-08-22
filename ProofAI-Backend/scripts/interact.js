@@ -1,5 +1,5 @@
 async function main() {
-  const contractAddress = "0x2cF2EC61D5F50bcaa41F2e7Dae256955E4D1b5D3";
+  const contractAddress = "0x5FB23E28eADE3dD32551224E9FAF7BC1c7A53D71";
   const userAddress = "0x8dD11dCcD996d697a731b830495c95b6F6FeCdF3";
   const metadataURI = "https://gist.githubusercontent.com/vivekgh0sh/496601df7f5388a49f3ac4c9beced37e/raw/85bcb7f4ffa95fe7159277a69e1c6784c7adec04/credential-1.json";
   
