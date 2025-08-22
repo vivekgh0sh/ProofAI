@@ -9,7 +9,7 @@ import CompanyDashboard from './components/CompanyDashboard';
 import contractArtifact from './artifacts/ProofAI.json';
 
 // Your final contract address
-const contractAddress = "0x175c4c40695ee7fd113F06d972987D13E3571E0c";
+const contractAddress = "0x2cF2EC61D5F50bcaa41F2e7Dae256955E4D1b5D3";
 const contractABI = contractArtifact.abi;
 
 function App() {

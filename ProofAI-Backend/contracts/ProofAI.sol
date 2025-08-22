@@ -72,19 +72,13 @@ contract ProofAI is ERC721Enumerable, Ownable {
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal override {
-        // This is our smart check: Does a record for this token ID exist in our `employments` mapping?
-        // If it does, the `employer` address will not be the default zero address.
-        if (employments[tokenId].employer != address(0)) {
-            // This is an Employment NFT. It IS soulbound.
-            // We only allow a transfer if it's the initial mint (from the zero address).
-            require(from == address(0), "ProofAI SBT: Employment NFTs are soulbound and cannot be transferred.");
-        }
-        
-        // If the check above did not fail, it means this is a Credential NFT.
-        // For now, we allow these to be transferred normally.
-        // We let the original `super._transfer` function from the OpenZeppelin contract handle it.
+        // This rule now applies to ALL tokens minted by this contract.
+        // A transfer is ONLY allowed if it is the initial mint (from the zero address).
+        // All subsequent transfers from one user to another will be blocked.
+        require(from == address(0), "ProofAI SBT: All credentials on this platform are soulbound and cannot be transferred.");
         super._transfer(from, to, tokenId);
     }
+
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");

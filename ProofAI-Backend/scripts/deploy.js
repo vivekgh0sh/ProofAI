@@ -1,27 +1,52 @@
-// A Hardhat script for deploying our ProofAI contract.
+// scripts/deploy.js
+
+const fs = require('fs'); // Node.js File System module
+
+const path = require('path');
+
 
 async function main() {
-  // 1. Get the contract factory for ProofAI
-  // The contract factory is an abstraction used to deploy new smart contracts.
-  const ProofAI = await hre.ethers.getContractFactory("ProofAI");
-  console.log("Deploying ProofAI contract...");
 
-  // 2. Deploy the contract
-  // This sends a transaction to the network to create our contract.
-  const proofAI = await ProofAI.deploy();
+  console.log("Deploying the ProofAI smart contract...");
 
-  // 3. Wait for the deployment to be confirmed on the blockchain
+  const proofAI = await hre.ethers.deployContract("ProofAI");
+
   await proofAI.waitForDeployment();
 
-  // 4. Log the address of the deployed contract
-  // This address is how we will interact with our contract later.
-  console.log("ProofAI contract deployed to:", proofAI.target);
+
+  const contractAddress = proofAI.target;
+
+  console.log(`✅ ProofAI contract deployed to: ${contractAddress}`);
+
+
+  // --- Auto-update the config file ---
+
+  console.log("Updating the configuration file with the new contract address...");
+
+  const configPath = path.join(__dirname, '../config.js');
+
+  let configContent = fs.readFileSync(configPath, 'utf8');
+
+
+  // Use a regular expression to replace the old address with the new one
+
+  const addressRegex = /contractAddress: "0x[a-fA-F0-9]{40}"/g;
+
+  configContent = configContent.replace(addressRegex, `contractAddress: "${contractAddress}"`);
+
+
+  fs.writeFileSync(configPath, configContent, 'utf8');
+
+  console.log("✅ Configuration file updated successfully.");
+
 }
 
-// Standard Hardhat script runner pattern
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
+
 main().catch((error) => {
+
   console.error(error);
+
   process.exitCode = 1;
+
 });
+
