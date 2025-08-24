@@ -6,6 +6,8 @@ ProofChain is a decentralized employment verification platform that prevents hir
 
 ## 🌐 Live Demo
 **Website:** https://vivekgh0sh.github.io/ProofChain/  
+**Pitch Slide:** https://docs.google.com/presentation/d/1nxuniCmgBrgPFvO2LeFrKyjdGfKjad-dfkP-n-4nNew/edit?usp=sharing
+**Demo Video: ** https://odysee.com/@vivekgh0sh:4/ProofChain:d
 **Smart Contract:** `0x5FB23E28eADE3dD32551224E9FAF7BC1c7A53D71` (BNB Testnet)
 
 ## 🚀 Features
